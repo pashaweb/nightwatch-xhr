@@ -4,22 +4,22 @@ import type {Callback, ListenedXHR} from "../types";
 const util = require('util');
 const events = require('events');
 
-import {clientPoll} from '../client';
+import {clientImagesPoll} from '../images';
 
-function waitForCountXHR() {
+function waitForCountIMG() {
     // $FlowFixMe
     events.EventEmitter.call(this);
 }
 
-util.inherits(waitForCountXHR, events.EventEmitter);
+util.inherits(waitForCountIMG, events.EventEmitter);
 
-waitForCountXHR.prototype.poll = function () {
+waitForCountIMG.prototype.poll = function () {
     const command = this;
-    this.api.execute(clientPoll, [], function ({value: xhrs}: { value: ?Array<ListenedXHR> }) {
+    this.api.execute(clientImagesPoll, [], function ({value: imgs}: { value: ?[] }) {
 
         let filtered = [];
-        if (xhrs && xhrs.length) {
-            filtered = xhrs.filter(xhr => xhr.url.match(command.urlPattern));
+        if (imgs && imgs.length) {
+            filtered = imgs.filter(img => img.match(command.urlPattern));
         }
         if (filtered.length === command.count) {
             command.callback(filtered);
@@ -31,18 +31,18 @@ waitForCountXHR.prototype.poll = function () {
     });
 };
 
-waitForCountXHR.prototype.command = function (urlPattern: string = '', delay: ?number, count: ?number = 1, callback: Callback) {
+waitForCountIMG.prototype.command = function (urlPattern: string = '', delay: ?number, count: ?number = 1, callback: Callback) {
     this.callback = callback;
     this.urlPattern = urlPattern;
     this.count = count;
     const command = this;
     this.reschedulePolling();
     this.timeout = setTimeout(() => {
-        this.api.execute(clientPoll, [], function ({value: xhrs}: { value: ?Array<ListenedXHR> }) {
+        this.api.execute(clientImagesPoll, [], function ({value: imgs}: { value: ?Array[] }) {
 
             let filtered = [];
-            if (xhrs && xhrs.length) {
-                filtered = xhrs.filter(xhr => xhr.url.match(command.urlPattern));
+            if (imgs && imgs.length) {
+                filtered = imgs.filter(img => img.match(command.urlPattern));
             }
                 command.callback(filtered);
                 clearInterval(command.pollingInterval);
@@ -53,11 +53,11 @@ waitForCountXHR.prototype.command = function (urlPattern: string = '', delay: ?n
 
 }
 
-waitForCountXHR.prototype.reschedulePolling = function () {
+waitForCountIMG.prototype.reschedulePolling = function () {
     var command = this;
     this.pollingInterval = setInterval(function () {
         return command.poll.call(command);
     }, 100);
 };
 
-module.exports = waitForCountXHR;
+module.exports = waitForCountIMG;
