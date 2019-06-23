@@ -6,14 +6,14 @@ const events = require('events');
 
 import {clientImagesPoll} from '../images';
 
-function waitForCountIMG() {
+function waitForNewIMG() {
     // $FlowFixMe
     events.EventEmitter.call(this);
 }
 
-util.inherits(waitForCountIMG, events.EventEmitter);
+util.inherits(waitForNewIMG, events.EventEmitter);
 
-waitForCountIMG.prototype.poll = function () {
+waitForNewIMG.prototype.poll = function () {
     const command = this;
     this.api.execute(clientImagesPoll, [], function ({value: imgs}: { value: ?[] }) {
 
@@ -21,12 +21,17 @@ waitForCountIMG.prototype.poll = function () {
         if (imgs && imgs.length) {
             filtered = imgs.filter(img => img.match(command.urlPattern));
         }
+
+        if (!command.initCount && command.initCount !== 0) {
+            command.initCount = filtered.length;
+        }
+
         if (command.count && filtered.length === command.count) {
             command.callback(filtered);
             clearInterval(command.pollingInterval);
             clearTimeout(command.timeout);
             command.emit('complete');
-        }else if(!command.count && filtered.length>0){
+        } else if (!command.count && filtered.length > 0 && filtered.length > command.initCount) {
 
             command.callback(filtered);
             clearInterval(command.pollingInterval);
@@ -38,7 +43,7 @@ waitForCountIMG.prototype.poll = function () {
     });
 };
 
-waitForCountIMG.prototype.command = function (urlPattern: string = '', delay: ?number, count: ?number = 0, callback: Callback) {
+waitForNewIMG.prototype.command = function (urlPattern: string = '', delay: ?number, count: ?number = 0, callback: Callback) {
     this.callback = callback;
     this.urlPattern = urlPattern;
     this.count = count;
@@ -51,20 +56,20 @@ waitForCountIMG.prototype.command = function (urlPattern: string = '', delay: ?n
             if (imgs && imgs.length) {
                 filtered = imgs.filter(img => img.match(command.urlPattern));
             }
-                command.callback(filtered);
-                clearInterval(command.pollingInterval);
-                clearTimeout(command.timeout);
-                command.emit('complete');
+            command.callback(filtered);
+            clearInterval(command.pollingInterval);
+            clearTimeout(command.timeout);
+            command.emit('complete');
         });
     }, delay)
 
 }
 
-waitForCountIMG.prototype.reschedulePolling = function () {
+waitForNewIMG.prototype.reschedulePolling = function () {
     var command = this;
     this.pollingInterval = setInterval(function () {
         return command.poll.call(command);
     }, 100);
 };
 
-module.exports = waitForCountIMG;
+module.exports = waitForNewIMG;
