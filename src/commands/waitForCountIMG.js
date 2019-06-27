@@ -21,7 +21,7 @@ waitForCountIMG.prototype.poll = function () {
         if (imgs && imgs.length) {
             filtered = imgs.filter(img => img.match(command.urlPattern));
         }
-        if (command.count && filtered.length === command.count) {
+        if (command.count && filtered.length >= command.count) {
             command.callback(filtered);
             clearInterval(command.pollingInterval);
             clearTimeout(command.timeout);
