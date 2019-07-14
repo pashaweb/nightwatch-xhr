@@ -13,7 +13,7 @@ function GetXHR() {
 
 util.inherits(GetXHR, events.EventEmitter);
 
-x.requestData[undefined.oppKey].prototype.poll = function () {
+GetXHR.prototype.poll = function () {
     var command = this;
     this.api.execute(_client.clientPoll, [], function (_ref) {
         var xhrs = _ref.value;
