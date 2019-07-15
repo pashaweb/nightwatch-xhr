@@ -12,6 +12,14 @@ export const clientIMGListen = function () {
             set: function (url) {
                 //if (url.indexOf("imprammp.taboola.com/st")>-1) {
                 window.imagesListen.push(url);
+                if(window.xhrListen){
+                    window.xhrListen.push({
+                        id: 'image',
+                        method:'GET',
+                        url,
+                        openedTime: Date.now(),
+                    });
+                }
                 console.log("*************** LOGGED A PIX ****************");
                 //}
                 this._src = url;
