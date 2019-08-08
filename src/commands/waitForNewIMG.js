@@ -69,7 +69,7 @@ waitForNewIMG.prototype.reschedulePolling = function () {
     var command = this;
     this.pollingInterval = setInterval(function () {
         return command.poll.call(command);
-    }, 100);
+    }, 300);
 };
 
 module.exports = waitForNewIMG;
